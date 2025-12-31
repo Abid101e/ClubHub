@@ -7,49 +7,49 @@
     <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
         <div class="bg-gradient-to-r from-indigo-600 to-purple-600 h-32"></div>
 
-        <div class="px-8 py-6">
-            <div class="flex justify-between items-start mb-6">
+        <div class="px-4 md:px-8 py-6">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-6 space-y-4 md:space-y-0">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ club.name }}</h1>
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">{{ club.name }}</h1>
                     <p class="text-gray-600 text-sm">
                         Created by <span class="font-semibold">{{ club.creator.username }}</span> on {{ club.created_at|date:"M d, Y" }}
                     </p>
                 </div>
 
-                <div class="flex items-center space-x-4">
+                <div class="flex flex-wrap items-center gap-2 md:gap-4">
                     {% if user.is_authenticated %}
                         {% if user_membership %}
                             {% if user_membership.status == 'PENDING' %}
-                                <button class="bg-yellow-100 text-yellow-800 px-6 py-2 rounded-md font-semibold cursor-not-allowed" disabled>
+                                <button class="bg-yellow-100 text-yellow-800 px-4 md:px-6 py-2 rounded-md font-semibold cursor-not-allowed text-sm md:text-base" disabled>
                                     Request Pending
                                 </button>
                             {% elif user_membership.status == 'APPROVED' %}
-                                <div class="bg-green-100 text-green-800 px-6 py-2 rounded-md font-semibold">
+                                <div class="bg-green-100 text-green-800 px-4 md:px-6 py-2 rounded-md font-semibold text-sm md:text-base">
                                     {{ user_membership.get_role_display }}
                                 </div>
                                 {% if user_membership.role == 'ADMIN' %}
-                                    <a href="{% url 'clubs:requests' club.pk %}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md font-semibold transition">
-                                        View Requests
+                                    <a href="{% url 'clubs:requests' club.pk %}" class="bg-purple-600 hover:bg-purple-700 text-white px-3 md:px-4 py-2 rounded-md font-semibold transition text-sm md:text-base">
+                                        <span class="hidden sm:inline">View </span>Requests
                                     </a>
                                 {% endif %}
-                                <a href="{% url 'clubs:members' club.pk %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md font-semibold transition">
-                                    View Members
+                                <a href="{% url 'clubs:members' club.pk %}" class="bg-gray-600 hover:bg-gray-700 text-white px-3 md:px-4 py-2 rounded-md font-semibold transition text-sm md:text-base">
+                                    <span class="hidden sm:inline">View </span>Members
                                 </a>
                             {% elif user_membership.status == 'REJECTED' %}
-                                <button class="bg-red-100 text-red-800 px-6 py-2 rounded-md font-semibold cursor-not-allowed" disabled>
+                                <button class="bg-red-100 text-red-800 px-4 md:px-6 py-2 rounded-md font-semibold cursor-not-allowed text-sm md:text-base" disabled>
                                     Request Rejected
                                 </button>
                             {% endif %}
                         {% else %}
                             <form method="post" action="{% url 'clubs:join' club.pk %}">
                                 {% csrf_token %}
-                                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-md font-semibold transition">
+                                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 md:px-6 py-2 rounded-md font-semibold transition text-sm md:text-base">
                                     Join Club
                                 </button>
                             </form>
                         {% endif %}
                     {% else %}
-                        <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-md font-semibold transition">
+                        <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 md:px-6 py-2 rounded-md font-semibold transition text-sm md:text-base">
                             Login to Join
                         </a>
                     {% endif %}
@@ -82,8 +82,8 @@
                     </button>
                 </nav>
                 {% if user.is_authenticated and user_membership and user_membership.status == 'APPROVED' %}
-                    <a href="{% url 'posts:create' club.pk %}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-semibold transition">
-                        Create Post
+                    <a href="{% url 'posts:create' club.pk %}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 md:px-4 py-2 rounded-md text-xs md:text-sm font-semibold transition">
+                        <span class="hidden sm:inline">Create </span>Post
                     </a>
                 {% endif %}
             </div>

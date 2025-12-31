@@ -10,26 +10,26 @@
     <header class="bg-white shadow-sm">
         <nav class="container mx-auto px-4">
             <div class="flex items-center justify-between h-16">
-                <a href="{% url 'clubs:list' %}" class="text-2xl font-bold text-indigo-600 hover:text-indigo-700">
+                <a href="{% url 'clubs:list' %}" class="text-xl md:text-2xl font-bold text-indigo-600 hover:text-indigo-700">
                     ClubHub
                 </a>
-                <ul class="flex items-center space-x-6">
+                <ul class="flex items-center space-x-2 md:space-x-6">
                     {% if user.is_authenticated %}
-                        <li><a href="{% url 'clubs:list' %}" class="text-gray-700 hover:text-indigo-600">Clubs</a></li>
-                        <li><a href="{% url 'clubs:create' %}" class="text-gray-700 hover:text-indigo-600">Create Club</a></li>
-                        <li><span class="text-gray-600">Welcome, <span class="font-semibold">{{ user.username }}</span></span></li>
+                        <li class="hidden md:block"><a href="{% url 'clubs:list' %}" class="text-gray-700 hover:text-indigo-600">Clubs</a></li>
+                        <li class="hidden sm:block"><a href="{% url 'clubs:create' %}" class="text-gray-700 hover:text-indigo-600">Create Club</a></li>
+                        <li class="hidden md:block"><span class="text-gray-600">Welcome, <span class="font-semibold">{{ user.username }}</span></span></li>
                         <li>
                             <form method="post" action="{% url 'accounts:logout' %}" class="inline">
                                 {% csrf_token %}
-                                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition">
+                                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 md:px-4 py-2 rounded-md transition text-sm md:text-base">
                                     Logout
                                 </button>
                             </form>
                         </li>
                     {% else %}
-                        <li><a href="{% url 'clubs:list' %}" class="text-gray-700 hover:text-indigo-600">Clubs</a></li>
-                        <li><a href="{% url 'accounts:login' %}" class="text-gray-700 hover:text-indigo-600">Login</a></li>
-                        <li><a href="{% url 'accounts:signup' %}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md transition">Sign Up</a></li>
+                        <li class="hidden sm:block"><a href="{% url 'clubs:list' %}" class="text-gray-700 hover:text-indigo-600">Clubs</a></li>
+                        <li><a href="{% url 'accounts:login' %}" class="text-gray-700 hover:text-indigo-600 text-sm md:text-base">Login</a></li>
+                        <li><a href="{% url 'accounts:signup' %}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 md:px-4 py-2 rounded-md transition text-sm md:text-base">Sign Up</a></li>
                     {% endif %}
                 </ul>
             </div>

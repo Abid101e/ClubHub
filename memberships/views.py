@@ -73,6 +73,10 @@ class MembershipRequestListView(LoginRequiredMixin, ClubAdminRequiredMixin, List
 
 
 class ApproveMembershipView(LoginRequiredMixin, ClubAdminRequiredMixin, View):
+    def get_club(self):
+        membership = get_object_or_404(Membership, pk=self.kwargs['pk'])
+        return membership.club
+
     def post(self, request, pk):
         membership = get_object_or_404(Membership, pk=pk)
         club = membership.club
@@ -88,6 +92,10 @@ class ApproveMembershipView(LoginRequiredMixin, ClubAdminRequiredMixin, View):
 
 
 class RejectMembershipView(LoginRequiredMixin, ClubAdminRequiredMixin, View):
+    def get_club(self):
+        membership = get_object_or_404(Membership, pk=self.kwargs['pk'])
+        return membership.club
+
     def post(self, request, pk):
         membership = get_object_or_404(Membership, pk=pk)
         club = membership.club
