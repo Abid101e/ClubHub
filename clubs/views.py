@@ -2,10 +2,13 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, CreateView
+from django.db.models import Prefetch
 from django_filters.views import FilterView
 from clubs.models import Club
 from clubs.forms import ClubForm
 from clubs.filters import ClubFilter
+from posts.models import Post
+from memberships.models import Membership
 
 
 class ClubListView(FilterView):
@@ -25,26 +28,34 @@ class ClubDetailView(DetailView):
     context_object_name = 'club'
 
     def get_queryset(self):
-        return Club.objects.select_related('creator')
+        return Club.objects.select_related('creator').prefetch_related(
+            Prefetch(
+                'posts',
+                queryset=Post.objects.select_related('author').filter(
+                    is_published=True
+                ).order_by('-created_at')
+            ),
+            Prefetch(
+                'membership_set',
+                queryset=Membership.objects.select_related('user').filter(
+                    status='APPROVED'
+                )
+            )
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         club = self.object
 
-        context['news_posts'] = club.posts.filter(
-            type='NEWS',
-            is_published=True
-        ).select_related('author').order_by('-created_at')[:5]
-
-        context['blog_posts'] = club.posts.filter(
-            type='BLOG',
-            is_published=True
-        ).select_related('author').order_by('-created_at')[:5]
+        posts = list(club.posts.all())
+        context['news_posts'] = [p for p in posts if p.type == 'NEWS'][:5]
+        context['blog_posts'] = [p for p in posts if p.type == 'BLOG'][:5]
 
         if self.request.user.is_authenticated:
-            context['user_membership'] = club.membership_set.filter(
-                user=self.request.user
-            ).first()
+            context['user_membership'] = next(
+                (m for m in club.membership_set.all() if m.user == self.request.user),
+                None
+            )
         else:
             context['user_membership'] = None
 

@@ -48,3 +48,15 @@ class Club(models.Model):
 
     def get_absolute_url(self):
         return reverse('clubs:detail', kwargs={'slug': self.slug})
+    
+    @property
+    def approved_members(self):
+        return self.membership_set.filter(status='APPROVED')
+    
+    @property
+    def pending_requests(self):
+        return self.membership_set.filter(status='PENDING')
+    
+    @property
+    def published_posts(self):
+        return self.posts.filter(is_published=True)
