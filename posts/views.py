@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
-from django.views.generic import CreateView
+from django.views.generic import CreateView, DetailView
 from clubs.models import Club
 from clubs.mixins import ClubMemberRequiredMixin
 from posts.models import Post
@@ -55,3 +55,22 @@ class PostCreateView(LoginRequiredMixin, ClubMemberRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse('clubs:detail', kwargs={'slug': self.get_club().slug})
+
+
+class PostDetailView(DetailView):
+    model = Post
+    template_name = 'posts/post_detail.html'
+    context_object_name = 'post'
+
+    def get_queryset(self):
+        return Post.objects.select_related('club', 'author').filter(is_published=True)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['club'] = self.object.club
+        if self.request.user.is_authenticated:
+            context['user_membership'] = self.object.club.membership_set.filter(
+                user=self.request.user,
+                status='APPROVED'
+            ).first()
+        return context

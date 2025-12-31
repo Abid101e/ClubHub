@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} - {{ club.name }} - ClubHub{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Breadcrumb -->
+        <nav class="text-sm text-gray-600 mb-6">
+            <a href="{% url 'clubs:list' %}" class="hover:text-indigo-600">Clubs</a>
+            <span class="mx-2">/</span>
+            <a href="{% url 'clubs:detail' club.slug %}" class="hover:text-indigo-600">{{ club.name }}</a>
+            <span class="mx-2">/</span>
+            <span class="text-gray-900">{{ post.title }}</span>
+        </nav>
+
+        <!-- Post Container -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <!-- Post Header -->
+            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 md:px-8 py-8 md:py-12">
+                <div class="flex items-center mb-4">
+                    {% if post.type == 'NEWS' %}
+                        <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-yellow-400 text-yellow-900">
+                            News
+                        </span>
+                    {% else %}
+                        <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-white text-indigo-600">
+                            Blog
+                        </span>
+                    {% endif %}
+                </div>
+                <h1 class="text-2xl md:text-4xl font-bold text-white mb-4">{{ post.title }}</h1>
+                <div class="flex items-center text-white text-sm space-x-4">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-2">
+                            <span class="text-indigo-600 font-semibold">{{ post.author.username|first|upper }}</span>
+                        </div>
+                        <span>{{ post.author.username }}</span>
+                    </div>
+                    <span>•</span>
+                    <span>{{ post.created_at|date:"F d, Y" }}</span>
+                    <span>•</span>
+                    <span>{{ post.created_at|time:"g:i A" }}</span>
+                </div>
+            </div>
+
+            <!-- Post Content -->
+            <div class="px-6 md:px-8 py-8">
+                <div class="prose prose-lg max-w-none">
+                    <div class="text-gray-800 leading-relaxed whitespace-pre-line">{{ post.body }}</div>
+                </div>
+            </div>
+
+            <!-- Post Footer -->
+            <div class="border-t border-gray-200 px-6 md:px-8 py-6 bg-gray-50">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                    <div class="flex items-center space-x-4">
+                        <a href="{% url 'clubs:detail' club.slug %}" class="text-indigo-600 hover:text-indigo-700 font-medium">
+                            ← Back to {{ club.name }}
+                        </a>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        {% if post.updated_at != post.created_at %}
+                            Last updated: {{ post.updated_at|date:"M d, Y \a\t g:i A" }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Club Info Sidebar -->
+        <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">About {{ club.name }}</h3>
+            <p class="text-gray-600 mb-4">{{ club.description|truncatewords:30 }}</p>
+            <div class="flex items-center justify-between">
+                <a href="{% url 'clubs:detail' club.slug %}" class="text-indigo-600 hover:text-indigo-700 font-medium">
+                    View Club →
+                </a>
+                {% if user.is_authenticated and user_membership and user_membership.status == 'APPROVED' %}
+                    <a href="{% url 'posts:create' club.pk %}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-semibold transition">
+                        Create Post
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -94,11 +94,18 @@
                 <div class="space-y-6">
                     {% for post in news_posts %}
                         <div class="border-b border-gray-200 pb-6 last:border-b-0">
-                            <h3 class="text-xl font-bold text-gray-800 mb-2">{{ post.title }}</h3>
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">
+                                <a href="{% url 'posts:detail' post.pk %}" class="hover:text-indigo-600">{{ post.title }}</a>
+                            </h3>
                             <p class="text-gray-600 mb-3">{{ post.body|truncatewords:30 }}</p>
-                            <div class="flex items-center text-sm text-gray-500">
-                                <span class="mr-4">by {{ post.author.username }}</span>
-                                <span>{{ post.created_at|date:"M d, Y" }}</span>
+                            <div class="flex items-center justify-between text-sm text-gray-500">
+                                <div>
+                                    <span class="mr-4">by {{ post.author.username }}</span>
+                                    <span>{{ post.created_at|date:"M d, Y" }}</span>
+                                </div>
+                                <a href="{% url 'posts:detail' post.pk %}" class="text-indigo-600 hover:text-indigo-700 font-medium">
+                                    Read More →
+                                </a>
                             </div>
                         </div>
                     {% endfor %}
@@ -119,11 +126,18 @@
                 <div class="space-y-6">
                     {% for post in blog_posts %}
                         <div class="border-b border-gray-200 pb-6 last:border-b-0">
-                            <h3 class="text-xl font-bold text-gray-800 mb-2">{{ post.title }}</h3>
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">
+                                <a href="{% url 'posts:detail' post.pk %}" class="hover:text-indigo-600">{{ post.title }}</a>
+                            </h3>
                             <p class="text-gray-600 mb-3">{{ post.body|truncatewords:30 }}</p>
-                            <div class="flex items-center text-sm text-gray-500">
-                                <span class="mr-4">by {{ post.author.username }}</span>
-                                <span>{{ post.created_at|date:"M d, Y" }}</span>
+                            <div class="flex items-center justify-between text-sm text-gray-500">
+                                <div>
+                                    <span class="mr-4">by {{ post.author.username }}</span>
+                                    <span>{{ post.created_at|date:"M d, Y" }}</span>
+                                </div>
+                                <a href="{% url 'posts:detail' post.pk %}" class="text-indigo-600 hover:text-indigo-700 font-medium">
+                                    Read More →
+                                </a>
                             </div>
                         </div>
                     {% endfor %}
