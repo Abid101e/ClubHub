@@ -7,6 +7,7 @@ from clubs.models import Club
 from clubs.mixins import ClubMemberRequiredMixin
 from posts.models import Post
 from posts.forms import PostForm
+from memberships.models import Membership
 
 
 class PostCreateView(LoginRequiredMixin, ClubMemberRequiredMixin, CreateView):
@@ -20,9 +21,8 @@ class PostCreateView(LoginRequiredMixin, ClubMemberRequiredMixin, CreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         club = self.get_club()
-        membership = club.membership_set.filter(
-            user=self.request.user,
-            status='APPROVED'
+        membership = Membership.objects.approved().for_club(club).filter(
+            user=self.request.user
         ).first()
         kwargs['user_role'] = membership.role if membership else None
         return kwargs
@@ -34,9 +34,8 @@ class PostCreateView(LoginRequiredMixin, ClubMemberRequiredMixin, CreateView):
 
     def form_valid(self, form):
         club = self.get_club()
-        membership = club.membership_set.filter(
-            user=self.request.user,
-            status='APPROVED'
+        membership = Membership.objects.approved().for_club(club).filter(
+            user=self.request.user
         ).first()
 
         if not membership:
@@ -63,14 +62,13 @@ class PostDetailView(DetailView):
     context_object_name = 'post'
 
     def get_queryset(self):
-        return Post.objects.select_related('club', 'author').filter(is_published=True)
+        return Post.objects.published().select_related('club', 'author')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['club'] = self.object.club
         if self.request.user.is_authenticated:
-            context['user_membership'] = self.object.club.membership_set.filter(
-                user=self.request.user,
-                status='APPROVED'
-            ).first()
+            context['user_membership'] = Membership.objects.approved().for_club(
+                self.object.club
+            ).filter(user=self.request.user).first()
         return context

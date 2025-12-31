@@ -2,6 +2,8 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_http_methods
 from django.views import View
 from django.views.generic import ListView
 from clubs.models import Club
@@ -9,6 +11,7 @@ from clubs.mixins import ClubMemberRequiredMixin, ClubAdminRequiredMixin
 from memberships.models import Membership
 
 
+@method_decorator(require_http_methods(['POST']), name='dispatch')
 class JoinClubView(LoginRequiredMixin, View):
     def post(self, request, pk):
         club = get_object_or_404(Club, pk=pk)
@@ -43,10 +46,7 @@ class MemberListView(LoginRequiredMixin, ClubMemberRequiredMixin, ListView):
 
     def get_queryset(self):
         club = self.get_club()
-        return Membership.objects.filter(
-            club=club,
-            status='APPROVED'
-        ).select_related('user').order_by('-created_at')
+        return Membership.objects.approved().for_club(club).select_related('user').order_by('-created_at')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -66,10 +66,7 @@ class MembershipRequestListView(LoginRequiredMixin, ClubAdminRequiredMixin, List
 
     def get_queryset(self):
         club = self.get_club()
-        return Membership.objects.filter(
-            club=club,
-            status='PENDING'
-        ).select_related('user').order_by('-created_at')
+        return Membership.objects.pending().for_club(club).select_related('user').order_by('-created_at')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -77,6 +74,7 @@ class MembershipRequestListView(LoginRequiredMixin, ClubAdminRequiredMixin, List
         return context
 
 
+@method_decorator(require_http_methods(['POST']), name='dispatch')
 class ApproveMembershipView(LoginRequiredMixin, ClubAdminRequiredMixin, View):
     def get_club(self):
         membership = get_object_or_404(Membership, pk=self.kwargs['pk'])
@@ -96,6 +94,7 @@ class ApproveMembershipView(LoginRequiredMixin, ClubAdminRequiredMixin, View):
         return redirect('clubs:requests', pk=club.pk)
 
 
+@method_decorator(require_http_methods(['POST']), name='dispatch')
 class RejectMembershipView(LoginRequiredMixin, ClubAdminRequiredMixin, View):
     def get_club(self):
         membership = get_object_or_404(Membership, pk=self.kwargs['pk'])
@@ -115,6 +114,7 @@ class RejectMembershipView(LoginRequiredMixin, ClubAdminRequiredMixin, View):
         return redirect('clubs:requests', pk=club.pk)
 
 
+@method_decorator(require_http_methods(['POST']), name='dispatch')
 class PromoteMemberView(LoginRequiredMixin, ClubAdminRequiredMixin, View):
     def get_club(self):
         membership = get_object_or_404(Membership, pk=self.kwargs['pk'])
@@ -136,6 +136,7 @@ class PromoteMemberView(LoginRequiredMixin, ClubAdminRequiredMixin, View):
         return redirect('clubs:members', pk=club.pk)
 
 
+@method_decorator(require_http_methods(['POST']), name='dispatch')
 class DemoteMemberView(LoginRequiredMixin, ClubAdminRequiredMixin, View):
     def get_club(self):
         membership = get_object_or_404(Membership, pk=self.kwargs['pk'])
