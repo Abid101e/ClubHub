@@ -6,5 +6,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('clubs/', include('clubs.urls')),
+    path('', include('posts.urls')),
     path('', RedirectView.as_view(pattern_name='clubs:list', permanent=False)),
 ]
