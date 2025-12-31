@@ -1,10 +1,23 @@
 from django.urls import path
-from django.views.generic import TemplateView
+from clubs.views import ClubListView, ClubDetailView, ClubCreateView
+from memberships.views import (
+    JoinClubView,
+    MemberListView,
+    MembershipRequestListView,
+    ApproveMembershipView,
+    RejectMembershipView
+)
 
 
 app_name = 'clubs'
 
 urlpatterns = [
-    path('', TemplateView.as_view(template_name='clubs/club_list.html'), name='list'),
-    path('new/', TemplateView.as_view(template_name='clubs/club_form.html'), name='create'),
+    path('', ClubListView.as_view(), name='list'),
+    path('new/', ClubCreateView.as_view(), name='create'),
+    path('<slug:slug>/', ClubDetailView.as_view(), name='detail'),
+    path('<int:pk>/join/', JoinClubView.as_view(), name='join'),
+    path('<int:pk>/members/', MemberListView.as_view(), name='members'),
+    path('<int:pk>/requests/', MembershipRequestListView.as_view(), name='requests'),
+    path('membership/<int:pk>/approve/', ApproveMembershipView.as_view(), name='approve_membership'),
+    path('membership/<int:pk>/reject/', RejectMembershipView.as_view(), name='reject_membership'),
 ]

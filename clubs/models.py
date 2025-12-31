@@ -9,8 +9,8 @@ class ClubManager(models.Manager):
     def with_member_counts(self):
         return self.annotate(
             member_count=Count(
-                'membership',
-                filter=Q(membership__status='APPROVED')
+                'membership_set',
+                filter=Q(membership_set__status='APPROVED')
             )
         )
 

@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ club.name }} - ClubHub{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 h-32"></div>
+
+        <div class="px-8 py-6">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ club.name }}</h1>
+                    <p class="text-gray-600 text-sm">
+                        Created by <span class="font-semibold">{{ club.creator.username }}</span> on {{ club.created_at|date:"M d, Y" }}
+                    </p>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    {% if user.is_authenticated %}
+                        {% if user_membership %}
+                            {% if user_membership.status == 'PENDING' %}
+                                <button class="bg-yellow-100 text-yellow-800 px-6 py-2 rounded-md font-semibold cursor-not-allowed" disabled>
+                                    Request Pending
+                                </button>
+                            {% elif user_membership.status == 'APPROVED' %}
+                                <div class="bg-green-100 text-green-800 px-6 py-2 rounded-md font-semibold">
+                                    {{ user_membership.get_role_display }}
+                                </div>
+                                {% if user_membership.role == 'ADMIN' %}
+                                    <a href="{% url 'clubs:requests' club.pk %}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md font-semibold transition">
+                                        View Requests
+                                    </a>
+                                {% endif %}
+                                <a href="{% url 'clubs:members' club.pk %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md font-semibold transition">
+                                    View Members
+                                </a>
+                            {% elif user_membership.status == 'REJECTED' %}
+                                <button class="bg-red-100 text-red-800 px-6 py-2 rounded-md font-semibold cursor-not-allowed" disabled>
+                                    Request Rejected
+                                </button>
+                            {% endif %}
+                        {% else %}
+                            <form method="post" action="{% url 'clubs:join' club.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-md font-semibold transition">
+                                    Join Club
+                                </button>
+                            </form>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-md font-semibold transition">
+                            Login to Join
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-2">About</h2>
+                <p class="text-gray-600">{{ club.description }}</p>
+            </div>
+
+            <div class="flex items-center text-sm text-gray-500">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                </svg>
+                <span class="font-semibold">Members</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="border-b border-gray-200">
+            <nav class="flex">
+                <button onclick="showTab('news')" id="news-tab" class="tab-button px-6 py-4 text-sm font-medium text-gray-700 border-b-2 border-transparent hover:text-indigo-600 hover:border-indigo-600 focus:outline-none">
+                    News
+                </button>
+                <button onclick="showTab('blogs')" id="blogs-tab" class="tab-button px-6 py-4 text-sm font-medium text-gray-700 border-b-2 border-transparent hover:text-indigo-600 hover:border-indigo-600 focus:outline-none">
+                    Blogs
+                </button>
+            </nav>
+        </div>
+
+        <div id="news-content" class="tab-content p-6">
+            {% if news_posts %}
+                <div class="space-y-6">
+                    {% for post in news_posts %}
+                        <div class="border-b border-gray-200 pb-6 last:border-b-0">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">{{ post.title }}</h3>
+                            <p class="text-gray-600 mb-3">{{ post.body|truncatewords:30 }}</p>
+                            <div class="flex items-center text-sm text-gray-500">
+                                <span class="mr-4">by {{ post.author.username }}</span>
+                                <span>{{ post.created_at|date:"M d, Y" }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-12">
+                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+                    </svg>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No news posts yet</h3>
+                    <p class="text-gray-500">News posts will appear here once published.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div id="blogs-content" class="tab-content p-6 hidden">
+            {% if blog_posts %}
+                <div class="space-y-6">
+                    {% for post in blog_posts %}
+                        <div class="border-b border-gray-200 pb-6 last:border-b-0">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">{{ post.title }}</h3>
+                            <p class="text-gray-600 mb-3">{{ post.body|truncatewords:30 }}</p>
+                            <div class="flex items-center text-sm text-gray-500">
+                                <span class="mr-4">by {{ post.author.username }}</span>
+                                <span>{{ post.created_at|date:"M d, Y" }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-12">
+                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No blog posts yet</h3>
+                    <p class="text-gray-500">Blog posts will appear here once published.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function showTab(tabName) {
+    const tabs = ['news', 'blogs'];
+    tabs.forEach(tab => {
+        const content = document.getElementById(tab + '-content');
+        const button = document.getElementById(tab + '-tab');
+        if (tab === tabName) {
+            content.classList.remove('hidden');
+            button.classList.add('border-indigo-600', 'text-indigo-600');
+        } else {
+            content.classList.add('hidden');
+            button.classList.remove('border-indigo-600', 'text-indigo-600');
+        }
+    });
+}
+
+showTab('news');
+</script>
+{% endblock %}
