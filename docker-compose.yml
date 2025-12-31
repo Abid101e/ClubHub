@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: clubhub_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${DB_NAME:-clubhub_db}
+      - POSTGRES_USER=${DB_USER:-clubhub_user}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-changeme123}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-clubhub_user}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: clubhub_web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+      - /app/__pycache__
+      - /app/clubhub/__pycache__
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER:-clubhub_user}:${DB_PASSWORD:-changeme123}@db:5432/${DB_NAME:-clubhub_db}
+
+volumes:
+  postgres_data:
