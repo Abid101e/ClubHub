@@ -51,6 +51,11 @@ class MemberListView(LoginRequiredMixin, ClubMemberRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['club'] = self.get_club()
+        if self.request.user.is_authenticated:
+            context['user_membership'] = self.get_club().membership_set.filter(
+                user=self.request.user,
+                status='APPROVED'
+            ).first()
         return context
 
 
@@ -108,3 +113,45 @@ class RejectMembershipView(LoginRequiredMixin, ClubAdminRequiredMixin, View):
             messages.warning(request, 'This membership request has already been processed.')
 
         return redirect('clubs:requests', pk=club.pk)
+
+
+class PromoteMemberView(LoginRequiredMixin, ClubAdminRequiredMixin, View):
+    def get_club(self):
+        membership = get_object_or_404(Membership, pk=self.kwargs['pk'])
+        return membership.club
+
+    def post(self, request, pk):
+        membership = get_object_or_404(Membership, pk=pk)
+        club = membership.club
+
+        if membership.role == 'ADMIN':
+            messages.warning(request, 'Cannot change role of club admin.')
+        elif membership.status != 'APPROVED':
+            messages.error(request, 'Can only promote approved members.')
+        else:
+            membership.role = 'MODERATOR'
+            membership.save()
+            messages.success(request, f'{membership.user.username} has been promoted to Moderator!')
+
+        return redirect('clubs:members', pk=club.pk)
+
+
+class DemoteMemberView(LoginRequiredMixin, ClubAdminRequiredMixin, View):
+    def get_club(self):
+        membership = get_object_or_404(Membership, pk=self.kwargs['pk'])
+        return membership.club
+
+    def post(self, request, pk):
+        membership = get_object_or_404(Membership, pk=pk)
+        club = membership.club
+
+        if membership.role == 'ADMIN':
+            messages.warning(request, 'Cannot change role of club admin.')
+        elif membership.status != 'APPROVED':
+            messages.error(request, 'Can only demote approved members.')
+        else:
+            membership.role = 'MEMBER'
+            membership.save()
+            messages.success(request, f'{membership.user.username} has been demoted to Member.')
+
+        return redirect('clubs:members', pk=club.pk)

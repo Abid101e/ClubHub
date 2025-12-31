@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:16-alpine
@@ -7,9 +5,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=${DB_NAME:-clubhub_db}
-      - POSTGRES_USER=${DB_USER:-clubhub_user}
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-changeme123}
+      POSTGRES_DB: ${DB_NAME:-clubhub_db}
+      POSTGRES_USER: ${DB_USER:-clubhub_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme123}
     ports:
       - "5433:5432"
     healthcheck:
@@ -17,15 +15,24 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   web:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile
     container_name: clubhub_web
-    command: python manage.py runserver 0.0.0.0:8000
+    command: python3 manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
       - /app/__pycache__
+      - /app/accounts/__pycache__
+      - /app/clubs/__pycache__
       - /app/clubhub/__pycache__
+      - /app/memberships/__pycache__
+      - /app/posts/__pycache__
+      - staticfiles:/app/staticfiles
+      - media:/app/media
     ports:
       - "8000:8000"
     env_file:
@@ -34,7 +41,17 @@ services:
       db:
         condition: service_healthy
     environment:
-      - DATABASE_URL=postgresql://${DB_USER:-clubhub_user}:${DB_PASSWORD:-changeme123}@db:5432/${DB_NAME:-clubhub_db}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-clubhub_db}
+      DB_USER: ${DB_USER:-clubhub_user}
+      DB_PASSWORD: ${DB_PASSWORD:-changeme123}
+      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME:-admin}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-admin123}
+      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-admin@clubhub.local}
+    restart: unless-stopped
 
 volumes:
   postgres_data:
+  staticfiles:
+  media:

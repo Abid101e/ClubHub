@@ -5,38 +5,53 @@ echo "========================================"
 echo "ClubHub Docker Entrypoint"
 echo "========================================"
 
-echo "Waiting for PostgreSQL at $DB_HOST:$DB_PORT..."
-while ! pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" > /dev/null 2>&1; do
-  echo "PostgreSQL is unavailable - sleeping"
-  sleep 1
+echo "Waiting for PostgreSQL at ${DB_HOST:-localhost}:${DB_PORT:-5432}..."
+for i in {1..30}; do
+    if pg_isready -h "${DB_HOST:-localhost}" -p "${DB_PORT:-5432}" -U "${DB_USER:-clubhub_user}" > /dev/null 2>&1; then
+        echo "PostgreSQL is up and ready!"
+        break
+    fi
+    echo "Waiting for PostgreSQL... ($i/30)"
+    sleep 2
 done
-echo "PostgreSQL is up and ready!"
+
+if ! pg_isready -h "${DB_HOST:-localhost}" -p "${DB_PORT:-5432}" -U "${DB_USER:-clubhub_user}" > /dev/null 2>&1; then
+    echo "ERROR: PostgreSQL is not available after 60 seconds!"
+    exit 1
+fi
 
 echo "Running database migrations..."
-python manage.py migrate --noinput
+python3 manage.py migrate --noinput
 
 echo "Collecting static files..."
-python manage.py collectstatic --noinput --clear || true
+mkdir -p /app/staticfiles
+python3 manage.py collectstatic --noinput --clear || true
 
 if [ -n "$DJANGO_SUPERUSER_USERNAME" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
-    echo "Creating superuser account..."
-    python manage.py shell <<EOF
+    echo "Checking/creating superuser account..."
+    python3 manage.py shell <<EOF
 from django.contrib.auth import get_user_model
 User = get_user_model()
-if not User.objects.filter(username='$DJANGO_SUPERUSER_USERNAME').exists():
+username = '$DJANGO_SUPERUSER_USERNAME'
+if not User.objects.filter(username=username).exists():
     User.objects.create_superuser(
-        username='$DJANGO_SUPERUSER_USERNAME',
-        email='${DJANGO_SUPERUSER_EMAIL:-admin@example.com}',
+        username=username,
+        email='${DJANGO_SUPERUSER_EMAIL:-admin@clubhub.local}',
         password='$DJANGO_SUPERUSER_PASSWORD'
     )
-    print('Superuser created successfully!')
+    print(f'✓ Superuser "{username}" created successfully!')
 else:
-    print('Superuser already exists.')
+    print(f'✓ Superuser "{username}" already exists.')
 EOF
 fi
 
 echo "========================================"
 echo "Starting application..."
+echo "Access the app at: http://localhost:8000"
+echo "Admin panel at: http://localhost:8000/admin/"
+if [ -n "$DJANGO_SUPERUSER_USERNAME" ]; then
+    echo "Admin username: $DJANGO_SUPERUSER_USERNAME"
+fi
 echo "========================================"
 
 exec "$@"

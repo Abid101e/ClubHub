@@ -5,7 +5,9 @@ from memberships.views import (
     MemberListView,
     MembershipRequestListView,
     ApproveMembershipView,
-    RejectMembershipView
+    RejectMembershipView,
+    PromoteMemberView,
+    DemoteMemberView
 )
 
 
@@ -16,6 +18,8 @@ urlpatterns = [
     path('new/', ClubCreateView.as_view(), name='create'),
     path('membership/<int:pk>/approve/', ApproveMembershipView.as_view(), name='approve_membership'),
     path('membership/<int:pk>/reject/', RejectMembershipView.as_view(), name='reject_membership'),
+    path('membership/<int:pk>/promote/', PromoteMemberView.as_view(), name='promote_member'),
+    path('membership/<int:pk>/demote/', DemoteMemberView.as_view(), name='demote_member'),
     path('<int:pk>/join/', JoinClubView.as_view(), name='join'),
     path('<int:pk>/members/', MemberListView.as_view(), name='members'),
     path('<int:pk>/requests/', MembershipRequestListView.as_view(), name='requests'),
