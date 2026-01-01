@@ -2,18 +2,35 @@ from django.db import models
 from django.conf import settings
 
 
-class MembershipManager(models.Manager):
+class MembershipQuerySet(models.QuerySet):
     def approved(self):
         return self.filter(status='APPROVED')
-    
+
     def pending(self):
         return self.filter(status='PENDING')
-    
+
     def for_club(self, club):
         return self.filter(club=club)
-    
+
     def for_user(self, user):
         return self.filter(user=user)
+
+
+class MembershipManager(models.Manager):
+    def get_queryset(self):
+        return MembershipQuerySet(self.model, using=self._db)
+
+    def approved(self):
+        return self.get_queryset().approved()
+
+    def pending(self):
+        return self.get_queryset().pending()
+
+    def for_club(self, club):
+        return self.get_queryset().for_club(club)
+
+    def for_user(self, user):
+        return self.get_queryset().for_user(user)
 
 
 class Membership(models.Model):
