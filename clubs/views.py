@@ -3,6 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, CreateView
 from django.db.models import Prefetch
+from django.core.paginator import Paginator
 from django_filters.views import FilterView
 from clubs.models import Club
 from clubs.forms import ClubForm
@@ -48,8 +49,17 @@ class ClubDetailView(DetailView):
         club = self.object
 
         posts = list(club.posts.all())
-        context['news_posts'] = [p for p in posts if p.type == 'NEWS'][:5]
-        context['blog_posts'] = [p for p in posts if p.type == 'BLOG'][:5]
+        news_posts = [p for p in posts if p.type == 'NEWS']
+        blog_posts = [p for p in posts if p.type == 'BLOG']
+
+        news_page = self.request.GET.get('news_page', 1)
+        blog_page = self.request.GET.get('blog_page', 1)
+
+        news_paginator = Paginator(news_posts, 10)
+        blog_paginator = Paginator(blog_posts, 10)
+
+        context['news_posts'] = news_paginator.get_page(news_page)
+        context['blog_posts'] = blog_paginator.get_page(blog_page)
 
         if self.request.user.is_authenticated:
             context['user_membership'] = next(

@@ -5,10 +5,11 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_http_methods
 from django.views import View
-from django.views.generic import ListView
+from django_filters.views import FilterView
 from clubs.models import Club
 from clubs.mixins import ClubMemberRequiredMixin, ClubAdminRequiredMixin
 from memberships.models import Membership
+from memberships.filters import MemberFilter, MembershipRequestFilter
 
 
 @method_decorator(require_http_methods(['POST']), name='dispatch')
@@ -39,10 +40,12 @@ class JoinClubView(LoginRequiredMixin, View):
         return redirect('clubs:detail', slug=club.slug)
 
 
-class MemberListView(LoginRequiredMixin, ClubMemberRequiredMixin, ListView):
+class MemberListView(LoginRequiredMixin, ClubMemberRequiredMixin, FilterView):
     model = Membership
     template_name = 'clubs/member_list.html'
     context_object_name = 'members'
+    filterset_class = MemberFilter
+    paginate_by = 20
 
     def get_queryset(self):
         club = self.get_club()
@@ -59,10 +62,12 @@ class MemberListView(LoginRequiredMixin, ClubMemberRequiredMixin, ListView):
         return context
 
 
-class MembershipRequestListView(LoginRequiredMixin, ClubAdminRequiredMixin, ListView):
+class MembershipRequestListView(LoginRequiredMixin, ClubAdminRequiredMixin, FilterView):
     model = Membership
     template_name = 'clubs/membership_requests.html'
     context_object_name = 'requests'
+    filterset_class = MembershipRequestFilter
+    paginate_by = 20
 
     def get_queryset(self):
         club = self.get_club()

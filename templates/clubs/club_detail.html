@@ -110,6 +110,24 @@
                         </div>
                     {% endfor %}
                 </div>
+
+                {% if news_posts.has_other_pages %}
+                    <div class="flex justify-center items-center space-x-2 mt-8">
+                        {% if news_posts.has_previous %}
+                            <a href="?news_page=1" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">First</a>
+                            <a href="?news_page={{ news_posts.previous_page_number }}" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Previous</a>
+                        {% endif %}
+
+                        <span class="px-4 py-2 text-gray-700">
+                            Page {{ news_posts.number }} of {{ news_posts.paginator.num_pages }}
+                        </span>
+
+                        {% if news_posts.has_next %}
+                            <a href="?news_page={{ news_posts.next_page_number }}" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Next</a>
+                            <a href="?news_page={{ news_posts.paginator.num_pages }}" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Last</a>
+                        {% endif %}
+                    </div>
+                {% endif %}
             {% else %}
                 <div class="text-center py-12">
                     <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -142,6 +160,24 @@
                         </div>
                     {% endfor %}
                 </div>
+
+                {% if blog_posts.has_other_pages %}
+                    <div class="flex justify-center items-center space-x-2 mt-8">
+                        {% if blog_posts.has_previous %}
+                            <a href="?blog_page=1" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">First</a>
+                            <a href="?blog_page={{ blog_posts.previous_page_number }}" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Previous</a>
+                        {% endif %}
+
+                        <span class="px-4 py-2 text-gray-700">
+                            Page {{ blog_posts.number }} of {{ blog_posts.paginator.num_pages }}
+                        </span>
+
+                        {% if blog_posts.has_next %}
+                            <a href="?blog_page={{ blog_posts.next_page_number }}" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Next</a>
+                            <a href="?blog_page={{ blog_posts.paginator.num_pages }}" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Last</a>
+                        {% endif %}
+                    </div>
+                {% endif %}
             {% else %}
                 <div class="text-center py-12">
                     <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
